@@ -8,6 +8,14 @@ ROS2 Control hardware interface for Hoverboard motors. Implementation in C++ wit
 
 Hoverboard driver firmware: [ https://github.com/hoverboard-robotics/hoverboard-firmware-hack-FOC]( https://github.com/hoverboard-robotics/hoverboard-firmware-hack-FOC)
 
+# Setup
+Create workspace and clone:
+```sh
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+git clone git@github.com:rhodyboland/hoverboard_ros2_control.git
+```
+
 All ROS2 and system dependencies are installable by the rosdep command-line tool. Just run the following command:
 
 ```sh
@@ -36,13 +44,4 @@ ros2 launch hoverboard_demo_bringup hoverboard.launch.py
 ### Tests
 
 The code works well with USB to TTL adapter with a 3.3V voltage level and with a UART1 port on the Jetson Xavier NX Development Kit. The code was tested with ROS2 Humble distribution with a standalone and containerized (Docker) setup.
-
-### Cooperation and contact
-
-If you want to add or change something, just fork this repository and push changes by the pull request. If you need something, but you can't do it yourself, please write an issue. We will do our best to help.
-
-### Team
-
-* [Bart Van der Haagen](https://www.linkedin.com/in/bart-van-der-haagen-b91b10bb/)
-* [Robert Gruberski](https://www.linkedin.com/in/rgruberski/)
-
+Set serial port in hoverboard_demo_description/urdf/ros2_control.xacro and hoverboard_ros2_control/hoverboard_hardware_interface/include/hoverboard_hardware_interface/hoverboard_hardware_interface.hpp
