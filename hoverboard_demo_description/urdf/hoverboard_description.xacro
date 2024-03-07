@@ -5,6 +5,7 @@
     <xacro:include filename="macros.xacro" />
     <xacro:include filename="wheels.xacro" />
     <xacro:include filename="ros2_control.xacro" />
+    <xacro:include filename="lidar.xacro" />
 
     <xacro:property name="plate_length" value="0.7" />
     <xacro:property name="plate_width" value="0.4" />
@@ -46,6 +47,8 @@
         <parent link="base_link" />
         <child link="plate" />
     </joint>
+
+
 
     <xacro:driving_wheel suffix="left" reflect="1"/>
     <xacro:driving_wheel suffix="right" reflect="-1"/>
