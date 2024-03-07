@@ -37,12 +37,12 @@
             </geometry>
         </collision>
         <xacro:box_inertia mass="5" x="0.7" y="0.4" z="0.02">
-            <origin xyz="0.35 0 0.01" rpy="0.0 0.0 0.0"/>
+            <origin xyz="0 0 0.01" rpy="0.0 0.0 0.0"/>
         </xacro:box_inertia>
     </link>
 
     <joint name="base_link_plate_joint" type="fixed">
-        <origin xyz="-0.33 0 0"/>
+        <origin xyz="0 0 0"/>
         <parent link="base_link" />
         <child link="plate" />
     </joint>
@@ -50,7 +50,7 @@
     <xacro:driving_wheel suffix="left" reflect="1"/>
     <xacro:driving_wheel suffix="right" reflect="-1"/>
 
-    <xacro:caster_wheel suffix="back" reflect="-1" />
+    <xacro:caster_wheel suffix="back" reflect="1" />
 
     <xacro:hoverboard_ros2_control name="Hoverboard" />
 

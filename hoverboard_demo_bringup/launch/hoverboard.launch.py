@@ -39,11 +39,11 @@ def generate_launch_description():
         ]
     )
 
-    rviz_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare("hoverboard_demo_description"), "rviz", "hoverboard.rviz"
-        ]
-    )
+    # rviz_config_file = PathJoinSubstitution(
+    #     [
+    #         FindPackageShare("hoverboard_demo_description"), "rviz", "hoverboard.rviz"
+    #     ]
+    # )
 
     teleop_twist_joy_config_file = PathJoinSubstitution(
         [
@@ -77,12 +77,12 @@ def generate_launch_description():
         arguments=["hoverboard_base_controller", "-c", "/controller_manager"]
     )
 
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        arguments=["-d", rviz_config_file],
-    )
+    # rviz_node = Node(
+    #     package="rviz2",
+    #     executable="rviz2",
+    #     name="rviz2",
+    #     arguments=["-d", rviz_config_file],
+    # )
 
     joy_node = Node(
         package='joy', executable='joy_node', name='joy_node',
@@ -107,7 +107,7 @@ def generate_launch_description():
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         robot_controller_spawner,
-        rviz_node,
+        # rviz_node,
         joy_node,
         teleop_twist_joy_node,
     ])

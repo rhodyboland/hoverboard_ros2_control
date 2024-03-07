@@ -25,7 +25,7 @@
             <axis xyz="0 1 0" rpy="0 0 0" />
             <parent link="base_link"/>
             <child link="driving_wheel_${suffix}"/>
-            <origin xyz="0 ${((plate_width/2)+driving_wheel_thickness-0.195)/2*reflect} 0.038" rpy="0 0 0"/>
+            <origin xyz="0 ${0.26*reflect} 0.0" rpy="0 0 0"/>
         </joint>
 
         <gazebo reference="driving_wheel_${suffix}">
@@ -61,7 +61,7 @@
         <joint name="caster_wheel_${suffix}_joint" type="fixed">
             <parent link="base_link"/>
             <child link="caster_wheel_${suffix}"/>
-            <origin xyz="${0.12*reflect} 0 0" rpy="0 0 0"/>
+            <origin xyz="0.7 0 0" rpy="0 0 0"/>
         </joint>
 
         <gazebo reference="caster_wheel_${suffix}">
