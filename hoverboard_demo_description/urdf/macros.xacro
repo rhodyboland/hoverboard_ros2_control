@@ -10,11 +10,13 @@
     </xacro:macro>
 
     <!-- Define some commonly used intertial properties  -->
-    <xacro:macro name="box_inertia" params="m w h d">
+    <xacro:macro name="box_inertia" params="mass x y z *origin">
         <inertial>
-            <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
-            <mass value="${m}"/>
-            <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}" iyz="0.0" izz="${(m/12) * (w*w + h*h)}"/>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}" />
+            <inertia ixx="${(1/12) * mass * (y*y+z*z)}" ixy="0.0" ixz="0.0"
+                    iyy="${(1/12) * mass * (x*x+z*z)}" iyz="0.0"
+                    izz="${(1/12) * mass * (x*x+y*y)}" />
         </inertial>
     </xacro:macro>
 

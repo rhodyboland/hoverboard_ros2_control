@@ -25,7 +25,7 @@
             <axis xyz="0 1 0" rpy="0 0 0" />
             <parent link="base_link"/>
             <child link="driving_wheel_${suffix}"/>
-            <origin xyz="0 ${(plate_radius+driving_wheel_thickness+driving_wheel_base_gap-0.195)/2*reflect} 0.038" rpy="0 0 0"/>
+            <origin xyz="0 ${((plate_width/2)+driving_wheel_thickness-0.195)/2*reflect} 0.038" rpy="0 0 0"/>
         </joint>
 
         <gazebo reference="driving_wheel_${suffix}">
