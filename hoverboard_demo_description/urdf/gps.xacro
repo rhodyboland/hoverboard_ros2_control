@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot name="hoverboard_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <joint name="gps_joint" type="fixed">
+        <parent link="plate"/>
+        <child link="gps"/>
+        <origin xyz="-0.2 0 0.1" rpy="0 0 0"/>
+    </joint>
+
+    <link name="gps">
+
+        <visual>
+            <geometry>
+                <cylinder radius="0.02" length="0.01"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <contact_coefficients mu="100.0" kp="0.0" kd="0.0" />
+            <geometry>
+                <cylinder radius="0.02" length="0.01"/>
+            </geometry>
+        </collision>
+    </link>
+
+</robot>
