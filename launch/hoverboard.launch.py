@@ -25,7 +25,7 @@ def generate_launch_description():
             " ",
             PathJoinSubstitution(
                 [
-                    FindPackageShare("hoverboard_demo_description"), "urdf", "hoverboard_description.xacro"
+                    FindPackageShare("hoverboard_control"), "urdf", "hoverboard_description.xacro"
                 ]
             ),
         ]
@@ -35,7 +35,7 @@ def generate_launch_description():
 
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare("hoverboard_demo_bringup"), "config", "hoverboard_controllers.yaml",
+            FindPackageShare("hoverboard_control"), "config", "hoverboard_controllers.yaml",
         ]
     )
 
@@ -47,7 +47,7 @@ def generate_launch_description():
 
     teleop_twist_joy_config_file = PathJoinSubstitution(
         [
-            FindPackageShare("hoverboard_demo_bringup"), "config", "ps4.config.yaml",
+            FindPackageShare("hoverboard_control"), "config", "ps4.config.yaml",
         ]
     )
 

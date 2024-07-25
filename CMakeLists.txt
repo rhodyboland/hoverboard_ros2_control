@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(hoverboard_hardware_interface)
+project(hoverboard_control)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -24,13 +24,14 @@ ament_auto_add_library(
 )
 
 ament_auto_add_library(
-  ${PROJECT_NAME} SHARED
+  hoverboard_hardware_interface SHARED
   src/hoverboard_hardware_interface.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries(hoverboard_hardware_interface ${Boost_LIBRARIES})
 
 pluginlib_export_plugin_description_file(hardware_interface hoverboard_hardware_interface.xml)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -44,4 +45,19 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+# Install config files
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
+
+# Install URDF files
+install(DIRECTORY urdf/
+  DESTINATION share/${PROJECT_NAME}/urdf
+)
+
+# ament_package()
 ament_auto_package()

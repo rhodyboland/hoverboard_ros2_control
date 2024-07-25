@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "hoverboard_hardware_interface/serial_port_service.hpp"
+#include "../include/hoverboard_control/serial_port_service.hpp"
 
 using namespace hoverboard_hardware_interface;
 
-bool SerialPortService::connect(const std::string &serial_device, int baud_rate, int timeout)
+bool SerialPortService::connect(const std::string &serial_device, int baud_rate, int /*timeout*/)
 {
     boost::system::error_code ec;
 
@@ -30,7 +30,7 @@ bool SerialPortService::connect(const std::string &serial_device, int baud_rate,
 
     if (ec) {
         RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"), "Connection to the %s failed..., error: %s",
-            serial_device, ec.message().c_str());
+            serial_device.c_str(), ec.message().c_str());
         return false;
     }
 
@@ -110,7 +110,7 @@ void SerialPortService::asyncRead()
                     boost::asio::placeholders::bytes_transferred));
 }
 
-void SerialPortService::onReceive(const boost::system::error_code& ec, size_t bytes_transferred)
+void SerialPortService::onReceive(const boost::system::error_code& /*ec*/, size_t /*bytes_transferred*/)
 {
     RCLCPP_INFO(rclcpp::get_logger("SerialPortService"), "onReceive async event...");
 
@@ -123,6 +123,7 @@ void SerialPortService::onReceive(const boost::system::error_code& ec, size_t by
     //     return;
     // }
 }
+
 
 int SerialPortService::write(const char * message, const int & size)
 {

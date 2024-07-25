@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "hoverboard_hardware_interface/hoverboard_hardware_interface.hpp"
+#include "../include/hoverboard_control/hoverboard_hardware_interface.hpp"
 
 namespace hoverboard_hardware_interface
 {
