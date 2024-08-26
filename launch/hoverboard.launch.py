@@ -41,7 +41,7 @@ def generate_launch_description():
 
     # rviz_config_file = PathJoinSubstitution(
     #     [
-    #         FindPackageShare("hoverboard_demo_description"), "rviz", "hoverboard.rviz"
+    #         FindPackageShare("hoverboard_control"), "rviz", "hoverboard.rviz"
     #     ]
     # )
 
@@ -87,7 +87,7 @@ def generate_launch_description():
     joy_node = Node(
         package='joy', executable='joy_node', name='joy_node',
         parameters=[{
-            'deadzone': 0.05,
+            'deadzone': 0.1,
             'autorepeat_rate': 30.0
         }],
     )
