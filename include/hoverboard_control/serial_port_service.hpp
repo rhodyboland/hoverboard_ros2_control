@@ -14,56 +14,56 @@
 
 #pragma once
 
-#include <string>
-
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
 
 #include "rclcpp/rclcpp.hpp"
-
 #include "serial_port_protocol.hpp"
 
-#define SERIAL_PORT_READ_BUF_SIZE 256
+namespace hoverboard_hardware_interface {
+class SerialPortService {
+   public:
+    SerialPortService() = default;
+    ~SerialPortService() { disconnect(rclcpp::get_logger("SerialPortService")); }
 
-typedef boost::shared_ptr<boost::asio::serial_port> serial_port_ptr;
+    // Connection Management
+    bool connect(const std::string& serial_device, int baud_rate, int timeout, rclcpp::Logger logger);
+    bool disconnect(rclcpp::Logger logger);
 
-namespace hoverboard_hardware_interface
-{
-    class SerialPortService
-    {
-        public:
+    // Data Transmission
+    void read(rclcpp::Logger logger);
+    void asyncRead(rclcpp::Logger logger);
 
-        SerialPortService() = default;
+    int write(const char* message, const int& size, rclcpp::Logger logger);
 
-        bool connect(const std::string &serial_device, int baud_rate, int timeout);
-        bool disconnect();
+    // Callback Binding
+    void BindMotorWheelFeedbackCallback(std::function<void(MotorWheelFeedback)> callback);
 
-        void read();
-        void asyncRead();
+   private:
+    boost::asio::io_service io_service;
+    std::shared_ptr<boost::asio::serial_port> port;
+    std::mutex mutex_;
 
-        int write(const char *, const int &);
+    uint16_t head_frame = 0;
+    uint16_t msg_counter = 0;
+    uint8_t msg_command = 0;
 
-        void BindMotorWheelFeedbackCallback(std::function<void(MotorWheelFeedback)>);
+    char prev_byte = 0;
+    char* p = nullptr;
 
-        private:
+    char read_buf_raw[SERIAL_PORT_READ_BUF_SIZE]{};
 
-        boost::asio::io_service io_service;
-        serial_port_ptr port;
-        boost::mutex mutex;
+    void onReceive(const boost::system::error_code& ec, size_t bytes_transferred, rclcpp::Logger logger);
 
-        uint16_t head_frame = 0;
-        uint16_t msg_counter = 0;
-        uint8_t msg_command = 0;
+    std::function<void(MotorWheelFeedback)> motorWheelFeedbackCallback;
 
-        char prev_byte = 0;
-        char* p{};
+    MotorWheelFeedback motorWheelFeedback{};
 
-        char read_buf_raw[SERIAL_PORT_READ_BUF_SIZE]{};
-
-        void onReceive(const boost::system::error_code&, size_t);
-
-        std::function<void(MotorWheelFeedback)> motorWheelFeedbackCallback;
-
-        MotorWheelFeedback motorWheelFeedback {};
-    };
-}
+    std::thread io_thread_;
+};
+}  // namespace hoverboard_hardware_interface
