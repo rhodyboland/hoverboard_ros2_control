@@ -14,70 +14,75 @@
 
 #pragma once
 
+#include <atomic>
 #include <cstddef>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "rclcpp/rclcpp.hpp"
 #include "hardware_interface/system_interface.hpp"
+#include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
-#include "pluginlib/class_list_macros.hpp"
-
-#include "serial_port_service.hpp"
 #include "motor_wheel.hpp"
+#include "pluginlib/class_list_macros.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "serial_port_service.hpp"
 
-namespace hoverboard_hardware_interface
-{
-    class HoverboardHardwareInterface : public hardware_interface::SystemInterface
-    {
-        struct HardwareConfig
-        {
-            std::string leftWheelJointName = "left_wheel_joint";
-            std::string rightWheelJointName = "right_wheel_joint";
+namespace hoverboard_hardware_interface {
+class HoverboardHardwareInterface : public hardware_interface::SystemInterface {
+    struct HardwareConfig {
+        std::string leftWheelJointName = "left_wheel_joint";
+        std::string rightWheelJointName = "right_wheel_joint";
 
-            float loopRate = 30.0;
-            int encoderTicksPerRevolution = 1024;
-        };
-
-        struct SerialPortConfig
-        {
-            std::string device = "/dev/ttyS0";
-            int baudRate = 115200;
-            int timeout = 1000;
-        };
-
-    public:
-        RCLCPP_SHARED_PTR_DEFINITIONS(HoverboardHardwareInterface)
-
-        hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo &) override;
-
-        hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State &) override;
-
-        hardware_interface::CallbackReturn on_cleanup(const rclcpp_lifecycle::State &) override;
-
-        hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State &) override;
-
-        hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &) override;
-
-        std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
-
-        std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
-
-        hardware_interface::return_type read(const rclcpp::Time &, const rclcpp::Duration &) override;
-
-        hardware_interface::return_type write(const rclcpp::Time &, const rclcpp::Duration &) override;
-
-        void motorWheelFeedbackCallback(MotorWheelFeedback);
-
-    private:
-
-        SerialPortService serialPortService;
-
-        HardwareConfig hardwareConfig;
-        SerialPortConfig serialPortConfig;
-
-        MotorWheel leftWheel;
-        MotorWheel rightWheel;
-
-        bool connect();
-        bool disconnect();
+        float loopRate = 30.0;
+        int encoderTicksPerRevolution = 1024;
     };
-}
+
+    struct SerialPortConfig {
+        std::string device = "/dev/ttyS0";
+        int baudRate = 115200;
+        int timeout = 1000;
+    };
+
+   public:
+    RCLCPP_SHARED_PTR_DEFINITIONS(HoverboardHardwareInterface)
+
+    // Lifecycle Callbacks
+    hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
+    hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+    hardware_interface::CallbackReturn on_cleanup(const rclcpp_lifecycle::State& previous_state) override;
+    hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
+    hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
+
+    // Read and Write Interfaces
+    hardware_interface::return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+    hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+
+    // Export Interfaces
+    std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
+    std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
+
+    // Callback for motor wheel feedback
+    void motorWheelFeedbackCallback(MotorWheelFeedback feedback);
+
+   private:
+    SerialPortService serialPortService;
+
+    HardwareConfig hardwareConfig;
+    SerialPortConfig serialPortConfig;
+
+    MotorWheel leftWheel;
+    MotorWheel rightWheel;
+
+    // Internal flag to indicate fatal errors
+    std::atomic<bool> has_fatal_error_{false};
+
+    // Connection management
+    bool connect();
+    bool disconnect();
+};
+}  // namespace hoverboard_hardware_interface
+
+PLUGINLIB_EXPORT_CLASS(hoverboard_hardware_interface::HoverboardHardwareInterface, hardware_interface::SystemInterface)
