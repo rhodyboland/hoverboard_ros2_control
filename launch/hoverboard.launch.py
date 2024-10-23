@@ -17,6 +17,24 @@ from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
+import RPi.GPIO as GPIO
+import time
+GPIO.setmode(GPIO.BCM)
+
+ON_SENSE_PIN = 4
+SWITCH_PIN = 17
+
+GPIO.setup(ON_SENSE_PIN, GPIO.IN)
+GPIO.setup(SWITCH_PIN, GPIO.OUT)
+
+if not GPIO.input(ON_SENSE_PIN):
+    print("Hover was off, turning on")
+    GPIO.output(SWITCH_PIN, GPIO.HIGH)
+    time.sleep(0.1)
+    GPIO.output(SWITCH_PIN, GPIO.LOW)
+else:
+    print("Hover was on already")
+GPIO.cleanup()
 def generate_launch_description():
 
     robot_description_content = Command(
@@ -39,6 +57,12 @@ def generate_launch_description():
         ]
     )
 
+    controller_manager_params = PathJoinSubstitution(
+        [
+            FindPackageShare("hoverboard_control"), "config", "controller_manager_params.yaml",
+        ]
+    )
+
     # rviz_config_file = PathJoinSubstitution(
     #     [
     #         FindPackageShare("hoverboard_control"), "rviz", "hoverboard.rviz"
@@ -54,7 +78,7 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, robot_controllers],
+        parameters=[robot_description, controller_manager_params],
         output="both",
     )
 
@@ -74,7 +98,7 @@ def generate_launch_description():
     robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["hoverboard_base_controller", "-c", "/controller_manager"]
+        arguments=["hoverboard_base_controller", "--param-file", robot_controllers, "-c", "/controller_manager"]
     )
 
     # rviz_node = Node(
