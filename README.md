@@ -45,3 +45,5 @@ ros2 launch hoverboard_demo_bringup hoverboard.launch.py
 
 The code works well with USB to TTL adapter with a 3.3V voltage level and with a UART1 port on the Jetson Xavier NX Development Kit. The code was tested with ROS2 Humble distribution with a standalone and containerized (Docker) setup.
 Set serial port in hoverboard_demo_description/urdf/ros2_control.xacro and hoverboard_ros2_control/hoverboard_hardware_interface/include/hoverboard_hardware_interface/hoverboard_hardware_interface.hpp
+
+Note that the USART3 on the hoverboard is 5V tolerant so can yield strange results / damage things on 3V3. Best to configure hoverboard firmware to use USART2 (long sideboard cable) which is 3V3.

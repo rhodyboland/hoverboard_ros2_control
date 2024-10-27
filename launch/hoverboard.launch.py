@@ -57,12 +57,6 @@ def generate_launch_description():
         ]
     )
 
-    controller_manager_params = PathJoinSubstitution(
-        [
-            FindPackageShare("hoverboard_control"), "config", "controller_manager_params.yaml",
-        ]
-    )
-
     # rviz_config_file = PathJoinSubstitution(
     #     [
     #         FindPackageShare("hoverboard_control"), "rviz", "hoverboard.rviz"
@@ -78,7 +72,7 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, controller_manager_params],
+        parameters=[robot_description, robot_controllers],
         output="both",
     )
 
@@ -98,7 +92,7 @@ def generate_launch_description():
     robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["hoverboard_base_controller", "--param-file", robot_controllers, "-c", "/controller_manager"]
+        arguments=["hoverboard_base_controller", "-c", "/controller_manager"]
     )
 
     # rviz_node = Node(

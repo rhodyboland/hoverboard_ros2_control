@@ -16,12 +16,11 @@
 
 using namespace hoverboard_hardware_interface;
 
-bool SerialPortService::connect(const std::string &serial_device, int baud_rate, int /*timeout*/)
-{
+bool SerialPortService::connect(const std::string& serial_device, int baud_rate, int /*timeout*/) {
     boost::system::error_code ec;
 
     if (port) {
-        RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"), "Port is already opened...");
+        RCLCPP_FATAL(rclcpp::get_logger("SerialPortService"), "Port is already opened...");
         return false;
     }
 
@@ -29,8 +28,8 @@ bool SerialPortService::connect(const std::string &serial_device, int baud_rate,
     port->open(serial_device, ec);
 
     if (ec) {
-        RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"), "Connection to the %s failed..., error: %s",
-            serial_device.c_str(), ec.message().c_str());
+        RCLCPP_FATAL(rclcpp::get_logger("SerialPortService"), "Connection to the %s failed..., error: %s",
+                     serial_device.c_str(), ec.message().c_str());
         return false;
     }
 
@@ -47,8 +46,7 @@ bool SerialPortService::connect(const std::string &serial_device, int baud_rate,
     return true;
 }
 
-bool SerialPortService::disconnect()
-{
+bool SerialPortService::disconnect() {
     boost::mutex::scoped_lock look(mutex);
 
     if (port) {
@@ -63,30 +61,25 @@ bool SerialPortService::disconnect()
     return true;
 }
 
-void SerialPortService::read()
-{
+void SerialPortService::read() {
     boost::mutex::scoped_lock look(mutex);
 
     size_t bytes_transferred = port->read_some(boost::asio::buffer(read_buf_raw, SERIAL_PORT_READ_BUF_SIZE));
-    
+
     for (unsigned int i = 0; i < bytes_transferred; ++i) {
+        head_frame = ((uint16_t)(read_buf_raw[i]) << 8) | (uint8_t)prev_byte;
 
-        head_frame = ((uint16_t)(read_buf_raw[i]) << 8) | (uint8_t) prev_byte;
-
-        if (head_frame == HEAD_FRAME)
-        {
-            p = (char*) &motorWheelFeedback;
+        if (head_frame == HEAD_FRAME) {
+            p = (char*)&motorWheelFeedback;
             *p++ = prev_byte;
             *p++ = read_buf_raw[i];
             msg_counter = 2;
-        }
-        else if (msg_counter >= 2 && msg_counter < sizeof(MotorWheelFeedback)) {
+        } else if (msg_counter >= 2 && msg_counter < sizeof(MotorWheelFeedback)) {
             *p++ = read_buf_raw[i];
             msg_counter++;
         }
 
-        if (msg_counter == sizeof(MotorWheelFeedback))
-        {
+        if (msg_counter == sizeof(MotorWheelFeedback)) {
             motorWheelFeedbackCallback(motorWheelFeedback);
 
             msg_counter = 0;
@@ -96,22 +89,20 @@ void SerialPortService::read()
     }
 }
 
-void SerialPortService::asyncRead()
-{
+void SerialPortService::asyncRead() {
     if (port.get() == nullptr || !port->is_open()) {
         RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"), "Port is already closed...");
         return;
     }
 
     port->async_read_some(
-            boost::asio::buffer(read_buf_raw, SERIAL_PORT_READ_BUF_SIZE),
-            boost::bind(&SerialPortService::onReceive,
+        boost::asio::buffer(read_buf_raw, SERIAL_PORT_READ_BUF_SIZE),
+        boost::bind(&SerialPortService::onReceive,
                     this, boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
 }
 
-void SerialPortService::onReceive(const boost::system::error_code& /*ec*/, size_t /*bytes_transferred*/)
-{
+void SerialPortService::onReceive(const boost::system::error_code& /*ec*/, size_t /*bytes_transferred*/) {
     RCLCPP_INFO(rclcpp::get_logger("SerialPortService"), "onReceive async event...");
 
     // boost::mutex::scoped_lock look(mutex);
@@ -124,9 +115,7 @@ void SerialPortService::onReceive(const boost::system::error_code& /*ec*/, size_
     // }
 }
 
-
-int SerialPortService::write(const char * message, const int & size)
-{
+int SerialPortService::write(const char* message, const int& size) {
     boost::system::error_code ec;
 
     if (port.get() == nullptr || !port->is_open()) {

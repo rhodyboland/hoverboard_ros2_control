@@ -13,57 +13,53 @@
 // limitations under the License.
 
 #pragma once
-
-#include <string>
-
+// sudo chmod 666 /dev/tty0
+// sudo chown root.gpio /dev/gpiomem
+//  sudo chmod g+rw /dev/gpiomem
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <string>
 
 #include "rclcpp/rclcpp.hpp"
-
 #include "serial_port_protocol.hpp"
 
 #define SERIAL_PORT_READ_BUF_SIZE 256
 
 typedef boost::shared_ptr<boost::asio::serial_port> serial_port_ptr;
 
-namespace hoverboard_hardware_interface
-{
-    class SerialPortService
-    {
-        public:
+namespace hoverboard_hardware_interface {
+class SerialPortService {
+   public:
+    SerialPortService() = default;
 
-        SerialPortService() = default;
+    bool connect(const std::string &serial_device, int baud_rate, int timeout);
+    bool disconnect();
 
-        bool connect(const std::string &serial_device, int baud_rate, int timeout);
-        bool disconnect();
+    void read();
+    void asyncRead();
 
-        void read();
-        void asyncRead();
+    int write(const char *, const int &);
 
-        int write(const char *, const int &);
+    void BindMotorWheelFeedbackCallback(std::function<void(MotorWheelFeedback)>);
 
-        void BindMotorWheelFeedbackCallback(std::function<void(MotorWheelFeedback)>);
+   private:
+    boost::asio::io_service io_service;
+    serial_port_ptr port;
+    boost::mutex mutex;
 
-        private:
+    uint16_t head_frame = 0;
+    uint16_t msg_counter = 0;
+    uint8_t msg_command = 0;
 
-        boost::asio::io_service io_service;
-        serial_port_ptr port;
-        boost::mutex mutex;
+    char prev_byte = 0;
+    char *p{};
 
-        uint16_t head_frame = 0;
-        uint16_t msg_counter = 0;
-        uint8_t msg_command = 0;
+    char read_buf_raw[SERIAL_PORT_READ_BUF_SIZE]{};
 
-        char prev_byte = 0;
-        char* p{};
+    void onReceive(const boost::system::error_code &, size_t);
 
-        char read_buf_raw[SERIAL_PORT_READ_BUF_SIZE]{};
+    std::function<void(MotorWheelFeedback)> motorWheelFeedbackCallback;
 
-        void onReceive(const boost::system::error_code&, size_t);
-
-        std::function<void(MotorWheelFeedback)> motorWheelFeedbackCallback;
-
-        MotorWheelFeedback motorWheelFeedback {};
-    };
-}
+    MotorWheelFeedback motorWheelFeedback{};
+};
+}  // namespace hoverboard_hardware_interface
