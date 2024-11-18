@@ -7,7 +7,7 @@
     <xacro:include filename="ros2_control.xacro" />
     <xacro:include filename="lidar.xacro" />
     <xacro:include filename="gps.xacro" />
-    <xacro:include filename="mag.xacro" />
+    <xacro:include filename="imu.xacro" />
 
     <xacro:property name="plate_length" value="0.7" />
     <xacro:property name="plate_width" value="0.4" />
@@ -29,7 +29,7 @@
         <visual>
             <origin xyz="0.35 0 0.01"/>
             <geometry>
-                <box size="0.7 0.4 0.02"/>
+                <box size="0.7 0.5 0.02"/>
             </geometry>
             <material name="blue"/>
         </visual>
@@ -45,11 +45,19 @@
     </link>
 
     <joint name="base_link_plate_joint" type="fixed">
-        <origin xyz="0 0 0"/>
+        <origin xyz="-0.08255 0 0"/>
         <parent link="base_link" />
         <child link="plate" />
     </joint>
 
+    <link name="base_footprint">
+    </link>
+
+    <joint name="base_footprint_joint" type="fixed">
+        <origin xyz="0 0 0"/>
+        <parent link="base_link" />
+        <child link="base_footprint" />
+    </joint>
 
 
     <xacro:driving_wheel suffix="left" reflect="1"/>

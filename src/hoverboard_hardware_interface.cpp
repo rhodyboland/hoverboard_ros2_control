@@ -165,7 +165,7 @@ hardware_interface::return_type HoverboardHardwareInterface::write(const rclcpp:
     motorWheelDriveControl.steer = (int16_t)(steer);
     motorWheelDriveControl.checksum = (uint16_t)(motorWheelDriveControl.head ^ motorWheelDriveControl.steer ^ motorWheelDriveControl.speed);
 
-    RCLCPP_INFO(rclcpp::get_logger("SerialPortService"), "%i %i", motorWheelDriveControl.speed, motorWheelDriveControl.steer);
+    // RCLCPP_INFO(rclcpp::get_logger("SerialPortService"), "%i %i", motorWheelDriveControl.speed, motorWheelDriveControl.steer);
 
     serialPortService.write((const char *)&motorWheelDriveControl, sizeof(MotorWheelDriveControl));
 

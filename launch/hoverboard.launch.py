@@ -19,8 +19,8 @@ from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
-import RPi.GPIO as GPIO
-import time
+# import Jetson.GPIO as GPIO
+# import time
 
 # Define GPIO pins
 ON_SENSE_PIN = 4
@@ -30,36 +30,36 @@ def gpio_cleanup(context, *args, **kwargs):
     """Cleanup GPIO pins and turn off hoverboard."""
     print("Turning off hoverboard...")
     # Check if the hoverboard is on, then turn it off
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(ON_SENSE_PIN, GPIO.IN)
-    GPIO.setup(SWITCH_PIN, GPIO.OUT)
+    # GPIO.setmode(GPIO.BCM)
+    # GPIO.setup(ON_SENSE_PIN, GPIO.IN)
+    # GPIO.setup(SWITCH_PIN, GPIO.OUT)
     
-    if GPIO.input(ON_SENSE_PIN):
-        GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.1)
-        GPIO.output(SWITCH_PIN, GPIO.LOW)
-        print("Hoverboard turned off.")
-    else:
-        print("Hoverboard was already off.")
+    # if GPIO.input(ON_SENSE_PIN):
+        # GPIO.output(SWITCH_PIN, GPIO.HIGH)
+        # time.sleep(0.1)
+        # GPIO.output(SWITCH_PIN, GPIO.LOW)
+    #     print("Hoverboard turned off.")
+    # else:
+    #     print("Hoverboard was already off.")
     
     # Cleanup GPIO pins
-    GPIO.cleanup()
+    # GPIO.cleanup()
     print("GPIO cleanup completed.")
 
 def generate_launch_description():
     print("Checking hoverboard status...")
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(ON_SENSE_PIN, GPIO.IN)
-    GPIO.setup(SWITCH_PIN, GPIO.OUT)
+    # GPIO.setmode(GPIO.BCM)
+    # GPIO.setup(ON_SENSE_PIN, GPIO.IN)
+    # GPIO.setup(SWITCH_PIN, GPIO.OUT)
 
     # Turn on hoverboard if it’s off
-    if not GPIO.input(ON_SENSE_PIN):
-        print("Hoverboard was off, turning on")
-        GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.1)
-        GPIO.output(SWITCH_PIN, GPIO.LOW)
-    else:
-        print("Hoverboard was already on")
+    # if not GPIO.input(ON_SENSE_PIN):
+        # print("Hoverboard was off, turning on")
+        # GPIO.output(SWITCH_PIN, GPIO.HIGH)
+        # time.sleep(0.1)
+        # GPIO.output(SWITCH_PIN, GPIO.LOW)
+    # else:
+    #     print("Hoverboard was already on")
 
     # Define robot description
     robot_description_content = Command(

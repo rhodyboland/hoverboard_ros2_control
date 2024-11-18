@@ -2,9 +2,9 @@
 <robot name="hoverboard_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
     <joint name="gps_joint" type="fixed">
-        <parent link="plate"/>
+        <parent link="base_link"/>
         <child link="gps"/>
-        <origin xyz="-0.2 0 0.1" rpy="0 0 0"/>
+        <origin xyz="0.2 0 0.1" rpy="0 0 0"/>
     </joint>
 
     <link name="gps">

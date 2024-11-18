@@ -39,7 +39,7 @@ namespace hoverboard_hardware_interface
 
         struct SerialPortConfig
         {
-            std::string device = "/dev/ttyS0";
+            std::string device = "/dev/ttyTHS1";
             int baudRate = 115200;
             int timeout = 1000;
         };

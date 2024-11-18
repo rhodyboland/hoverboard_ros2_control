@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <robot name="hoverboard_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <joint name="magnetometer_link_joint" type="fixed">
-        <parent link="plate"/>
-        <child link="magnetometer_link"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+    <joint name="imu_link_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu_link"/>
+        <origin xyz="0.05 0 0.02" rpy="0 0 ${pi}"/>
     </joint>
 
-    <link name="magnetometer_link">
+    <link name="imu_link">
 
         <visual>
             <geometry>
                 <box size="0.02 0.02 0.01"/>
             </geometry>
-            <material name="blue"/>
+            <material name="red"/>
         </visual>
         <collision>
             <contact_coefficients mu="100.0" kp="0.0" kd="0.0" />
