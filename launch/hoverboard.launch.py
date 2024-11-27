@@ -77,9 +77,6 @@ def generate_launch_description():
         [FindPackageShare("hoverboard_control"), "config", "hoverboard_controllers.yaml"]
     )
 
-    teleop_twist_joy_config_file = PathJoinSubstitution(
-        [FindPackageShare("hoverboard_control"), "config", "ps4.config.yaml"]
-    )
 
     # Define nodes
     control_node = Node(
@@ -109,19 +106,6 @@ def generate_launch_description():
         arguments=["hoverboard_base_controller", "-c", "/controller_manager"],
     )
 
-    joy_node = Node(
-        package='joy', executable='joy_node', name='joy_node',
-        parameters=[{'deadzone': 0.1, 'autorepeat_rate': 30.0}]
-    )
-
-    teleop_twist_joy_node = Node(
-        package='teleop_twist_joy',
-        executable='teleop_node',
-        name='teleop_twist_joy_node',
-        parameters=[teleop_twist_joy_config_file],
-        # remappings=[('/cmd_vel', '/hoverboard_base_controller/cmd_vel_unstamped')],
-    )
-
     # Register a shutdown event handler to turn off hoverboard
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -137,6 +121,4 @@ def generate_launch_description():
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         robot_controller_spawner,
-        joy_node,
-        teleop_twist_joy_node,
     ])
