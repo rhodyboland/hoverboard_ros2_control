@@ -28,18 +28,17 @@ SWITCH_PIN = 11
 
 def gpio_cleanup(context, *args, **kwargs):
     """Cleanup GPIO pins and turn off hoverboard."""
-    print("Turning off hoverboard...")
     # Check if the hoverboard is on, then turn it off
-    # GPIO.setmode(GPIO.BOARD)  # Jetson board numbering scheme
+    GPIO.setmode(GPIO.BOARD)  # Jetson board numbering scheme
     # set pin as an output pin with optional initial state of HIGH
-    # GPIO.setup(SWITCH_PIN, GPIO.OUT, initial=GPIO.LOW)
-    # GPIO.setup(ON_SENSE_PIN, GPIO.IN)
+    GPIO.setup(SWITCH_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(ON_SENSE_PIN, GPIO.IN)
     
     if GPIO.input(ON_SENSE_PIN):
+        print("Turning off hoverboard...")
         GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.1)
+        time.sleep(0.2)
         GPIO.output(SWITCH_PIN, GPIO.LOW)
-        print("Hoverboard turned off.")
     else:
         print("Hoverboard was already off.")
     
@@ -56,12 +55,14 @@ def generate_launch_description():
 
     # Turn on hoverboard if it’s off
     if not GPIO.input(ON_SENSE_PIN):
-        print("Hoverboard was off, turning on")
+        print("Turning on hoverboard...")
         GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.1)
+        time.sleep(0.2)
         GPIO.output(SWITCH_PIN, GPIO.LOW)
     else:
         print("Hoverboard was already on")
+    GPIO.cleanup()
+    print("GPIO cleanup completed.")
 
     # Define robot description
     robot_description_content = Command(
