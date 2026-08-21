@@ -9,11 +9,11 @@
     <xacro:include filename="gps.xacro" />
     <xacro:include filename="imu.xacro" />
 
-    <xacro:property name="plate_length" value="0.7" />
-    <xacro:property name="plate_width" value="0.4" />
-    <xacro:property name="plate_height" value="0.02" />
+    <xacro:property name="plate_length" value="0.5" />
+    <xacro:property name="plate_width" value="0.25" />
+    <xacro:property name="plate_height" value="0.2" />
 
-    <xacro:property name="chassis_weight" value="1.0" />
+    <xacro:property name="chassis_weight" value="10.0" />
 
     <xacro:property name="driving_wheel_diameter" value="0.2" />
     <xacro:property name="driving_wheel_thickness" value="0.075" />
@@ -27,25 +27,25 @@
 
     <link name="plate">
         <visual>
-            <origin xyz="0.35 0 0.01"/>
+            <origin xyz="0.25 0 0.1"/>
             <geometry>
-                <box size="0.7 0.5 0.02"/>
+                <box size="0.5 0.25 0.2"/>
             </geometry>
-            <material name="blue"/>
+            <material name="blueclear"/>
         </visual>
         <collision>
-            <origin xyz="0.35 0 0.01"/>
+            <origin xyz="0.25 0 0.1"/>
             <geometry>
-                <box size="0.7 0.4 0.02"/>
+                <box size="0.5 0.25 0.2"/>
             </geometry>
         </collision>
-        <xacro:box_inertia mass="5" x="0.7" y="0.4" z="0.02">
+        <xacro:box_inertia mass="5" x="0.5" y="0.25" z="0.2">
             <origin xyz="0 0 0.01" rpy="0.0 0.0 0.0"/>
         </xacro:box_inertia>
     </link>
 
     <joint name="base_link_plate_joint" type="fixed">
-        <origin xyz="-0.08255 0 0"/>
+        <origin xyz="-0.095 0 0"/>
         <parent link="base_link" />
         <child link="plate" />
     </joint>

@@ -4,7 +4,7 @@
     <joint name="imu_link_joint" type="fixed">
         <parent link="base_link"/>
         <child link="imu_link"/>
-        <origin xyz="0.05 0 0.02" rpy="0 0 ${pi}"/>
+        <origin xyz="-0.022 0.045 0.09" rpy="0 0 ${pi}"/>
     </joint>
 
     <link name="imu_link">

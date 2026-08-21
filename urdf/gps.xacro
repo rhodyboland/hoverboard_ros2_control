@@ -8,21 +8,21 @@
     <joint name="gps_joint" type="fixed">
         <parent link="base_link"/>
         <child link="gps"/>
-        <origin xyz="-0.05 0 0.25" rpy="0 0 0"/>
+        <origin xyz="-0.05 0 0.225" rpy="0 0 0"/>
     </joint>
 
     <link name="gps">
 
         <visual>
             <geometry>
-                <cylinder radius="0.02" length="0.01"/>
+                <cylinder radius="0.02" length="0.05"/>
             </geometry>
             <material name="black"/>
         </visual>
         <collision>
             <contact_coefficients mu="100.0" kp="0.0" kd="0.0" />
             <geometry>
-                <cylinder radius="0.02" length="0.01"/>
+                <cylinder radius="0.02" length="0.05"/>
             </geometry>
         </collision>
     </link>
@@ -34,20 +34,20 @@
     <joint name="gps_moving_base_joint" type="fixed">
         <parent link="base_link"/>
         <child link="gps_moving_base"/>
-        <origin xyz="0.35 0 0.25" rpy="0 0 0"/>
+        <origin xyz="0.35 0 0.225" rpy="0 0 0"/>
     </joint>
 
     <link name="gps_moving_base">
         <visual>
             <geometry>
-                <cylinder radius="0.02" length="0.01"/>
+                <cylinder radius="0.02" length="0.05"/>
             </geometry>
             <material name="blue"/>
         </visual>
         <collision>
             <contact_coefficients mu="100.0" kp="0.0" kd="0.0" />
             <geometry>
-                <cylinder radius="0.02" length="0.01"/>
+                <cylinder radius="0.02" length="0.05"/>
             </geometry>
         </collision>
     </link>

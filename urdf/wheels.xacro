@@ -9,7 +9,7 @@
                 <geometry>
                     <cylinder radius="${driving_wheel_diameter/2}" length="${driving_wheel_thickness}"/>
                 </geometry>
-                <material name="black"/>
+                <material name="gray"/>
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
@@ -25,7 +25,7 @@
             <axis xyz="0 1 0" rpy="0 0 0" />
             <parent link="base_link"/>
             <child link="driving_wheel_${suffix}"/>
-            <origin xyz="0 ${0.26*reflect} 0.0" rpy="0 0 0"/>
+            <origin xyz="0 ${0.18*reflect} 0.0" rpy="0 0 0"/>
         </joint>
 
         <gazebo reference="driving_wheel_${suffix}">
@@ -61,7 +61,7 @@
         <joint name="caster_wheel_${suffix}_joint" type="fixed">
             <parent link="base_link"/>
             <child link="caster_wheel_${suffix}"/>
-            <origin xyz="0.6 0 0" rpy="0 0 0"/>
+            <origin xyz="0.35 0 -0.05" rpy="0 0 0"/>
         </joint>
 
         <gazebo reference="caster_wheel_${suffix}">
