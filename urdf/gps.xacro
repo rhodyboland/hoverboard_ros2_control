@@ -2,8 +2,8 @@
 <robot name="hoverboard_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
     <!--
-        ACM2 / rover antenna. This is the position source used by navsat_transform.
-        It sits 5 cm behind the diff-drive axle center.
+        /dev/boxbot/gps_rover antenna. This is the position source used by
+        navsat_transform. It sits 5 cm behind the diff-drive axle center.
     -->
     <joint name="gps_joint" type="fixed">
         <parent link="base_link"/>
@@ -28,8 +28,8 @@
     </link>
 
     <!--
-        ACM0 / moving-base antenna. This receiver is only used to form the
-        moving-baseline heading; it is 40 cm in front of the rover antenna.
+        /dev/boxbot/gps_moving_base antenna. This receiver is only used to form
+        the moving-baseline heading; it is 40 cm in front of the rover antenna.
     -->
     <joint name="gps_moving_base_joint" type="fixed">
         <parent link="base_link"/>

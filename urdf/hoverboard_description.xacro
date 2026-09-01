@@ -27,20 +27,20 @@
 
     <link name="plate">
         <visual>
-            <origin xyz="0.25 0 0.1"/>
+            <origin xyz="${plate_length/2} 0 ${plate_height/2}"/>
             <geometry>
-                <box size="0.5 0.25 0.2"/>
+                <box size="${plate_length} ${plate_width} ${plate_height}"/>
             </geometry>
             <material name="blueclear"/>
         </visual>
         <collision>
-            <origin xyz="0.25 0 0.1"/>
+            <origin xyz="${plate_length/2} 0 ${plate_height/2}"/>
             <geometry>
-                <box size="0.5 0.25 0.2"/>
+                <box size="${plate_length} ${plate_width} ${plate_height}"/>
             </geometry>
         </collision>
-        <xacro:box_inertia mass="5" x="0.5" y="0.25" z="0.2">
-            <origin xyz="0 0 0.01" rpy="0.0 0.0 0.0"/>
+        <xacro:box_inertia mass="${chassis_weight}" x="${plate_length}" y="${plate_width}" z="${plate_height}">
+            <origin xyz="${plate_length/2} 0 ${plate_height/2}" rpy="0.0 0.0 0.0"/>
         </xacro:box_inertia>
     </link>
 
