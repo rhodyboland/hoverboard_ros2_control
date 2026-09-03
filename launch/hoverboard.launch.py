@@ -13,56 +13,48 @@
 # limitations under the License.
 
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler, OpaqueFunction
+from launch.actions import (
+    DeclareLaunchArgument,
+    ExecuteProcess,
+    RegisterEventHandler,
+    TimerAction,
+)
+from launch.conditions import IfCondition
 from launch.event_handlers import OnShutdown
 from launch_ros.actions import Node
-from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+from launch_ros.parameter_descriptions import ParameterValue
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+)
 from launch_ros.substitutions import FindPackageShare
 
-import Jetson.GPIO as GPIO
-import time
-
-# Define GPIO pins
-ON_SENSE_PIN = 7
-SWITCH_PIN = 11
-
-def gpio_cleanup(context, *args, **kwargs):
-    """Cleanup GPIO pins and turn off hoverboard."""
-    # Check if the hoverboard is on, then turn it off
-    GPIO.setmode(GPIO.BOARD)  # Jetson board numbering scheme
-    # set pin as an output pin with optional initial state of HIGH
-    GPIO.setup(SWITCH_PIN, GPIO.OUT, initial=GPIO.LOW)
-    GPIO.setup(ON_SENSE_PIN, GPIO.IN)
-    
-    if GPIO.input(ON_SENSE_PIN):
-        print("Turning off hoverboard...")
-        GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.2)
-        GPIO.output(SWITCH_PIN, GPIO.LOW)
-    else:
-        print("Hoverboard was already off.")
-    
-    # Cleanup GPIO pins
-    GPIO.cleanup()
-    print("GPIO cleanup completed.")
 
 def generate_launch_description():
-    print("Checking hoverboard status...")
-    GPIO.setmode(GPIO.BOARD)  # Jetson board numbering scheme
-    # set pin as an output pin with optional initial state of HIGH
-    GPIO.setup(SWITCH_PIN, GPIO.OUT, initial=GPIO.LOW)
-    GPIO.setup(ON_SENSE_PIN, GPIO.IN)
-
-    # Turn on hoverboard if it’s off
-    if not GPIO.input(ON_SENSE_PIN):
-        print("Turning on hoverboard...")
-        GPIO.output(SWITCH_PIN, GPIO.HIGH)
-        time.sleep(0.2)
-        GPIO.output(SWITCH_PIN, GPIO.LOW)
-    else:
-        print("Hoverboard was already on")
-    GPIO.cleanup()
-    print("GPIO cleanup completed.")
+    hoverboard_power_on = LaunchConfiguration("hoverboard_power_on")
+    hoverboard_power_off_on_shutdown = LaunchConfiguration(
+        "hoverboard_power_off_on_shutdown"
+    )
+    hoverboard_power_once_per_session = LaunchConfiguration(
+        "hoverboard_power_once_per_session"
+    )
+    hoverboard_sense_active_high = LaunchConfiguration(
+        "hoverboard_sense_active_high"
+    )
+    hoverboard_sense_pin = LaunchConfiguration("hoverboard_sense_pin")
+    hoverboard_switch_pin = LaunchConfiguration("hoverboard_switch_pin")
+    hoverboard_power_state_file = LaunchConfiguration("hoverboard_power_state_file")
+    hoverboard_power_pulse_seconds = LaunchConfiguration(
+        "hoverboard_power_pulse_seconds"
+    )
+    hoverboard_power_settle_seconds = LaunchConfiguration(
+        "hoverboard_power_settle_seconds"
+    )
+    hoverboard_control_start_delay = LaunchConfiguration(
+        "hoverboard_control_start_delay"
+    )
 
     # Define robot description
     robot_description_content = Command(
@@ -74,12 +66,61 @@ def generate_launch_description():
             ),
         ]
     )
-    robot_description = {"robot_description": robot_description_content}
+    robot_description = {
+        "robot_description": ParameterValue(robot_description_content, value_type=str)
+    }
 
     robot_controllers = PathJoinSubstitution(
         [FindPackageShare("hoverboard_control"), "config", "hoverboard_controllers.yaml"]
     )
 
+    power_on = ExecuteProcess(
+        cmd=[
+            FindExecutable(name="ros2"),
+            "run",
+            "hoverboard_control",
+            "hoverboard_power.py",
+            "on",
+            "--sense-pin",
+            hoverboard_sense_pin,
+            "--switch-pin",
+            hoverboard_switch_pin,
+            "--pulse-seconds",
+            hoverboard_power_pulse_seconds,
+            "--settle-seconds",
+            hoverboard_power_settle_seconds,
+            "--sense-active-high",
+            hoverboard_sense_active_high,
+            "--once-per-session",
+            hoverboard_power_once_per_session,
+            "--state-file",
+            hoverboard_power_state_file,
+        ],
+        output="screen",
+        condition=IfCondition(hoverboard_power_on),
+    )
+
+    power_off = ExecuteProcess(
+        cmd=[
+            FindExecutable(name="ros2"),
+            "run",
+            "hoverboard_control",
+            "hoverboard_power.py",
+            "off",
+            "--sense-pin",
+            hoverboard_sense_pin,
+            "--switch-pin",
+            hoverboard_switch_pin,
+            "--pulse-seconds",
+            hoverboard_power_pulse_seconds,
+            "--sense-active-high",
+            hoverboard_sense_active_high,
+            "--state-file",
+            hoverboard_power_state_file,
+        ],
+        output="screen",
+        condition=IfCondition(hoverboard_power_off_on_shutdown),
+    )
 
     # Define nodes
     control_node = Node(
@@ -109,19 +150,53 @@ def generate_launch_description():
         arguments=["hoverboard_base_controller", "-c", "/controller_manager"],
     )
 
-    # Register a shutdown event handler to turn off hoverboard
+    delayed_control_start = TimerAction(
+        period=hoverboard_control_start_delay,
+        actions=[
+            control_node,
+            joint_state_broadcaster_spawner,
+            robot_controller_spawner,
+        ],
+    )
+
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
-                OpaqueFunction(function=gpio_cleanup)
+                power_off
             ]
         )
     )
 
     return LaunchDescription([
+        DeclareLaunchArgument("hoverboard_power_on", default_value="true"),
+        DeclareLaunchArgument(
+            "hoverboard_power_off_on_shutdown",
+            default_value="false",
+            description=(
+                "Pulse the hoverboard power switch on launch shutdown. "
+                "Keep false unless the sense line is known-good."
+            ),
+        ),
+        DeclareLaunchArgument(
+            "hoverboard_power_once_per_session",
+            default_value="true",
+            description=(
+                "Only send one startup pulse per state-file session. This avoids "
+                "toggle-off relaunches when the sense line is unavailable."
+            ),
+        ),
+        DeclareLaunchArgument("hoverboard_sense_active_high", default_value="true"),
+        DeclareLaunchArgument("hoverboard_sense_pin", default_value="7"),
+        DeclareLaunchArgument("hoverboard_switch_pin", default_value="11"),
+        DeclareLaunchArgument(
+            "hoverboard_power_state_file",
+            default_value="/tmp/boxbot_hoverboard_power_on",
+        ),
+        DeclareLaunchArgument("hoverboard_power_pulse_seconds", default_value="0.2"),
+        DeclareLaunchArgument("hoverboard_power_settle_seconds", default_value="0.5"),
+        DeclareLaunchArgument("hoverboard_control_start_delay", default_value="1.0"),
+        power_on,
         shutdown_handler,
-        control_node,
         robot_state_pub_node,
-        joint_state_broadcaster_spawner,
-        robot_controller_spawner,
+        delayed_control_start,
     ])
