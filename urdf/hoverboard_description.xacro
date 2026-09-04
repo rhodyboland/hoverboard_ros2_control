@@ -6,6 +6,7 @@
     <xacro:include filename="wheels.xacro" />
     <xacro:include filename="ros2_control.xacro" />
     <xacro:include filename="lidar.xacro" />
+    <xacro:include filename="realsense.xacro" />
     <xacro:include filename="gps.xacro" />
     <xacro:include filename="imu.xacro" />
 
