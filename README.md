@@ -1,3 +1,21 @@
+# Lyrical port
+
+Branch `codex/lyrical` targets ROS 2 Lyrical. The hardware plugin uses
+framework-managed command/state interfaces and accepts stamped commands through
+`/hoverboard_base_controller/cmd_vel`, remapped to `/cmd_vel` by the launch file.
+The controller receives robot description on its ROS topic.
+
+The simulated-serial test `test_lyrical_interface` checks encoder states, command
+conversion, stop on deactivation, and nonfinite command rejection. It uses a
+pseudo-terminal and never connects to the robot. Physical UART/GPIO validation
+is still required before hardware bringup.
+
+Keyboard teleop must publish stamped commands:
+
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true -p frame_id:=base_link
+```
+
 # ROS2 Control Hoverboard Hardware Interface
 
 ROS2 Control hardware interface for Hoverboard motors. Implementation in C++ with Boost libraries. All steering and feedback messages are transmitted by serial port communication.

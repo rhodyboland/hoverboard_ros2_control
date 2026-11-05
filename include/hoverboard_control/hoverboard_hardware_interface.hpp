@@ -47,7 +47,7 @@ namespace hoverboard_hardware_interface
     public:
         RCLCPP_SHARED_PTR_DEFINITIONS(HoverboardHardwareInterface)
 
-        hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo &) override;
+        hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareComponentInterfaceParams &) override;
 
         hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State &) override;
 
@@ -56,10 +56,6 @@ namespace hoverboard_hardware_interface
         hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State &) override;
 
         hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State &) override;
-
-        std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
-
-        std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
         hardware_interface::return_type read(const rclcpp::Time &, const rclcpp::Duration &) override;
 

@@ -35,7 +35,6 @@ namespace hoverboard_hardware_interface
         int16_t encoderLowWrap;
         int16_t encoderHighWrap;
 
-        double command = 0.0;
         double position = 0.0;
         double velocity = 0.0;
 

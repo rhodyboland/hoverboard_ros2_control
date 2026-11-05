@@ -126,9 +126,10 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_description, robot_controllers],
+        parameters=[robot_controllers],
         output="both",
-        remappings=[('/hoverboard_base_controller/cmd_vel_unstamped', '/cmd_vel')],
+        remappings=[('~/robot_description', '/robot_description'),
+                    ('/hoverboard_base_controller/cmd_vel', '/cmd_vel')],
     )
 
     robot_state_pub_node = Node(
