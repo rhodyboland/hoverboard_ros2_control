@@ -36,8 +36,12 @@ pluginlib_export_plugin_description_file(hardware_interface hoverboard_hardware_
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(diff_drive_controller REQUIRED)
   ament_add_gtest(test_lyrical_interface test/test_lyrical_interface.cpp)
-  target_link_libraries(test_lyrical_interface hoverboard_hardware_interface util)
+  target_link_libraries(test_lyrical_interface hoverboard_hardware_interface util
+    diff_drive_controller::diff_drive_controller)
+  target_compile_definitions(test_lyrical_interface PRIVATE
+    HOVERBOARD_CONTROLLERS_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/hoverboard_controllers.yaml")
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files

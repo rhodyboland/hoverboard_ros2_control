@@ -11,6 +11,7 @@
 #include <string>
 
 #include "hardware_interface/component_parser.hpp"
+#include "diff_drive_controller_parameters.hpp"
 #include "hoverboard_control/hoverboard_hardware_interface.hpp"
 
 using hardware_interface::CallbackReturn;
@@ -140,4 +141,27 @@ TEST_F(LyricalInterfaceTest, NonfiniteCommandsSendZeroAndReportError)
   const auto stopped = receive_command();
   EXPECT_EQ(stopped.speed, 0);
   EXPECT_EQ(stopped.steer, 0);
+}
+
+TEST_F(LyricalInterfaceTest, ControllerYamlPassesLyricalParameterValidation)
+{
+  rclcpp::NodeOptions options;
+  options.arguments({"--ros-args", "--params-file", HOVERBOARD_CONTROLLERS_FILE});
+  auto node = std::make_shared<rclcpp::Node>("hoverboard_base_controller", options);
+  diff_drive_controller::ParamListener listener(node);
+  const auto params = listener.get_params();
+  EXPECT_EQ(params.left_wheel_names.at(0), "driving_wheel_left_joint");
+  EXPECT_EQ(params.right_wheel_names.at(0), "driving_wheel_right_joint");
+  EXPECT_DOUBLE_EQ(params.wheel_radius, 0.1);
+  EXPECT_DOUBLE_EQ(params.cmd_vel_timeout, 0.5);
+  EXPECT_DOUBLE_EQ(params.linear.x.max_acceleration, 1.0);
+  EXPECT_DOUBLE_EQ(params.linear.x.max_deceleration, -1.0);
+  EXPECT_DOUBLE_EQ(params.linear.x.max_acceleration_reverse, -1.0);
+  EXPECT_DOUBLE_EQ(params.linear.x.max_deceleration_reverse, 1.0);
+  EXPECT_DOUBLE_EQ(params.angular.z.max_acceleration, 1.0);
+  EXPECT_DOUBLE_EQ(params.angular.z.max_deceleration, -1.0);
+  EXPECT_DOUBLE_EQ(params.angular.z.max_acceleration_reverse, -1.0);
+  EXPECT_DOUBLE_EQ(params.angular.z.max_deceleration_reverse, 1.0);
+  EXPECT_TRUE(std::isnan(params.linear.x.max_jerk));
+  EXPECT_TRUE(std::isnan(params.angular.z.max_jerk));
 }
