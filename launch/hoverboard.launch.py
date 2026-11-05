@@ -142,13 +142,17 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
+        arguments=["joint_state_broadcaster", "-c", "/controller_manager",
+                   "--param-file", robot_controllers],
     )
 
     robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["hoverboard_base_controller", "-c", "/controller_manager"],
+        arguments=["hoverboard_base_controller", "-c", "/controller_manager",
+                   "--param-file", robot_controllers,
+                   "--controller-ros-args",
+                   "--remap /hoverboard_base_controller/cmd_vel:=/cmd_vel"],
     )
 
     delayed_control_start = TimerAction(
