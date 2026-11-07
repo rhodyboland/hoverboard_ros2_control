@@ -8,7 +8,8 @@
     <joint name="camera_joint" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link"/>
-        <origin xyz="0.42 0 0.1" rpy="0 0 0"/>
+        <!-- base_link is at the wheel axis. Positive pitch points +X down. -->
+        <origin xyz="0.42 0 0.16" rpy="0 ${5*pi/180} 0"/>
     </joint>
 
     <link name="camera_link">
