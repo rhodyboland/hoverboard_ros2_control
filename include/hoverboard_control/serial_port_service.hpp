@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #pragma once
+
+#include <chrono>
 // sudo chmod 666 /dev/tty0
 // sudo chown root.gpio /dev/gpiomem
 //  sudo chmod g+rw /dev/gpiomem
@@ -35,7 +37,7 @@ class SerialPortService {
     bool connect(const std::string &serial_device, int baud_rate, int timeout);
     bool disconnect();
 
-    void read();
+    bool read();
     void asyncRead();
 
     int write(const char *, const int &);
@@ -46,6 +48,8 @@ class SerialPortService {
     boost::asio::io_service io_service;
     serial_port_ptr port;
     boost::mutex mutex;
+    std::chrono::steady_clock::time_point last_feedback_time_;
+    std::chrono::milliseconds feedback_timeout_{1000};
 
     uint16_t head_frame = 0;
     uint16_t msg_counter = 0;

@@ -6,9 +6,11 @@
 #include <unistd.h>
 
 #include <cmath>
+#include <chrono>
 #include <limits>
 #include <memory>
 #include <string>
+#include <thread>
 
 #include "hardware_interface/component_parser.hpp"
 #include "diff_drive_controller_parameters.hpp"
@@ -132,6 +134,45 @@ TEST_F(LyricalInterfaceTest, EncoderFeedbackUpdatesFrameworkStates)
   EXPECT_NEAR(hardware_.get_state<double>("right/position"), 2 * M_PI, 1e-9);
   EXPECT_NEAR(hardware_.get_state<double>("left/velocity"), 2 * M_PI, 1e-9);
   EXPECT_NEAR(hardware_.get_state<double>("right/velocity"), 4 * M_PI, 1e-9);
+}
+
+TEST_F(LyricalInterfaceTest, MissingFeedbackDoesNotBlockTheControlLoop)
+{
+  const auto start = std::chrono::steady_clock::now();
+  EXPECT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.02)), return_type::OK);
+  EXPECT_LT(std::chrono::steady_clock::now() - start, std::chrono::milliseconds(100));
+}
+
+TEST_F(LyricalInterfaceTest, FeedbackTimeoutSendsStopAndReportsError)
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+  EXPECT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.02)), return_type::ERROR);
+  const auto stopped = receive_command();
+  EXPECT_EQ(stopped.speed, 0);
+  EXPECT_EQ(stopped.steer, 0);
+}
+
+TEST(SerialPortTimingTest, FullTransmitQueueDoesNotBlock)
+{
+  int master, slave;
+  char path[128];
+  ASSERT_EQ(openpty(&master, &slave, path, nullptr, nullptr), 0);
+  hoverboard_hardware_interface::SerialPortService serial;
+  ASSERT_TRUE(serial.connect(path, 115200, 1000));
+  const std::string data(1024, 'x');
+  bool full = false;
+  const auto start = std::chrono::steady_clock::now();
+  for (int i = 0; i < 1000; ++i) {
+    if (serial.write(data.data(), data.size()) == 0) {
+      full = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(full);
+  EXPECT_LT(std::chrono::steady_clock::now() - start, std::chrono::milliseconds(100));
+  serial.disconnect();
+  close(master);
+  close(slave);
 }
 
 TEST_F(LyricalInterfaceTest, NonfiniteCommandsSendZeroAndReportError)

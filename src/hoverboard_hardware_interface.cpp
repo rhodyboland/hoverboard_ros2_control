@@ -133,7 +133,12 @@ hardware_interface::return_type HoverboardHardwareInterface::read(const rclcpp::
     if (period.seconds() <= 0.0) {
         return hardware_interface::return_type::ERROR;
     }
-    serialPortService.read();
+    if (!serialPortService.read()) {
+        MotorWheelDriveControl stopped{};
+        stopped.checksum = stopped.head;
+        serialPortService.write(reinterpret_cast<const char *>(&stopped), sizeof(stopped));
+        return hardware_interface::return_type::ERROR;
+    }
 
     double lastPosition = leftWheel.position;
     leftWheel.position = leftWheel.calculateEncoderAngle();
