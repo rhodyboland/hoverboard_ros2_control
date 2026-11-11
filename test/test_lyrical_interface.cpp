@@ -128,12 +128,35 @@ TEST_F(LyricalInterfaceTest, EncoderFeedbackUpdatesFrameworkStates)
   feedback.head = HEAD_FRAME;
   feedback.leftMotorEncoderCumulativeCount = 45;
   feedback.rightMotorEncoderCumulativeCount = 90;
+  feedback.checksum = feedbackChecksum(feedback);
   ASSERT_EQ(::write(master_, &feedback, sizeof(feedback)), static_cast<ssize_t>(sizeof(feedback)));
   ASSERT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.5)), return_type::OK);
   EXPECT_NEAR(hardware_.get_state<double>("left/position"), M_PI, 1e-9);
   EXPECT_NEAR(hardware_.get_state<double>("right/position"), 2 * M_PI, 1e-9);
   EXPECT_NEAR(hardware_.get_state<double>("left/velocity"), 2 * M_PI, 1e-9);
   EXPECT_NEAR(hardware_.get_state<double>("right/velocity"), 4 * M_PI, 1e-9);
+}
+
+TEST_F(LyricalInterfaceTest, CorruptFeedbackCannotMoveEncodersOrRefreshWatchdog)
+{
+  MotorWheelFeedback feedback{};
+  feedback.head = HEAD_FRAME;
+  feedback.leftMotorEncoderCumulativeCount = 10;
+  feedback.rightMotorEncoderCumulativeCount = 10;
+  feedback.checksum = feedbackChecksum(feedback);
+  ASSERT_EQ(::write(master_, &feedback, sizeof(feedback)), static_cast<ssize_t>(sizeof(feedback)));
+  ASSERT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.02)), return_type::OK);
+  const double position = hardware_.get_state<double>("left/position");
+  feedback.leftMotorEncoderCumulativeCount ^= 0x4000;
+  ASSERT_EQ(::write(master_, &feedback, sizeof(feedback)), static_cast<ssize_t>(sizeof(feedback)));
+  ASSERT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.02)), return_type::OK);
+  EXPECT_DOUBLE_EQ(hardware_.get_state<double>("left/position"), position);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+  ASSERT_EQ(::write(master_, &feedback, sizeof(feedback)), static_cast<ssize_t>(sizeof(feedback)));
+  EXPECT_EQ(hardware_.read(rclcpp::Time(0), rclcpp::Duration::from_seconds(0.02)), return_type::ERROR);
+  const auto stopped = receive_command();
+  EXPECT_EQ(stopped.speed, 0);
+  EXPECT_EQ(stopped.steer, 0);
 }
 
 TEST_F(LyricalInterfaceTest, MissingFeedbackDoesNotBlockTheControlLoop)

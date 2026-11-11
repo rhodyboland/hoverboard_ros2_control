@@ -15,6 +15,7 @@
 #include "../include/hoverboard_control/serial_port_service.hpp"
 #include <algorithm>
 #include <cerrno>
+#include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -53,6 +54,8 @@ bool SerialPortService::connect(const std::string& serial_device, int baud_rate,
     last_feedback_time_ = std::chrono::steady_clock::now();
     msg_counter = 0;
     prev_byte = 0;
+    checksum_errors_ = 0;
+    last_checksum_warning_ = std::chrono::steady_clock::time_point{};
 
     // TODO: try to run it asynchronously
     // boost::thread t([ObjectPtr = &io_service] { return ObjectPtr->run(); });
@@ -87,6 +90,10 @@ bool SerialPortService::read() {
     const ssize_t bytes_transferred = ::read(
         port->native_handle(), read_buf_raw, SERIAL_PORT_READ_BUF_SIZE);
     if (bytes_transferred < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
+        const int read_error = errno;
+        RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"),
+                     "Hoverboard UART read failed: errno=%d (%s)",
+                     read_error, std::strerror(read_error));
         return false;
     }
 
@@ -104,8 +111,19 @@ bool SerialPortService::read() {
         }
 
         if (msg_counter == sizeof(MotorWheelFeedback)) {
-            motorWheelFeedbackCallback(motorWheelFeedback);
-            last_feedback_time_ = std::chrono::steady_clock::now();
+            const auto now = std::chrono::steady_clock::now();
+            if (feedbackChecksum(motorWheelFeedback) == motorWheelFeedback.checksum) {
+                motorWheelFeedbackCallback(motorWheelFeedback);
+                last_feedback_time_ = now;
+            } else {
+                ++checksum_errors_;
+                if (now - last_checksum_warning_ > std::chrono::seconds(5)) {
+                    RCLCPP_WARN(rclcpp::get_logger("SerialPortService"),
+                                "Discarding corrupt hoverboard feedback (checksum errors=%llu)",
+                                static_cast<unsigned long long>(checksum_errors_));
+                    last_checksum_warning_ = now;
+                }
+            }
 
             msg_counter = 0;
         }
@@ -156,7 +174,18 @@ int SerialPortService::write(const char* message, const int& size) {
     }
 
     const ssize_t written = ::write(port->native_handle(), message, size);
-    return written < 0 ? 0 : static_cast<int>(written);
+    if (written < 0) {
+        const int write_error = errno;
+        RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"),
+                     "Hoverboard UART write failed: errno=%d (%s), requested=%d bytes",
+                     write_error, std::strerror(write_error), size);
+        return 0;
+    }
+    if (written != size) {
+        RCLCPP_ERROR(rclcpp::get_logger("SerialPortService"),
+                     "Hoverboard UART incomplete write: sent=%zd of %d bytes", written, size);
+    }
+    return static_cast<int>(written);
 }
 
 void SerialPortService::BindMotorWheelFeedbackCallback(std::function<void(MotorWheelFeedback)> fn) {

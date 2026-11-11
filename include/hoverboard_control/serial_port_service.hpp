@@ -50,6 +50,8 @@ class SerialPortService {
     boost::mutex mutex;
     std::chrono::steady_clock::time_point last_feedback_time_;
     std::chrono::milliseconds feedback_timeout_{1000};
+    std::chrono::steady_clock::time_point last_checksum_warning_;
+    uint64_t checksum_errors_ = 0;
 
     uint16_t head_frame = 0;
     uint16_t msg_counter = 0;

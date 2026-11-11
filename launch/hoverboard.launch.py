@@ -137,6 +137,7 @@ def generate_launch_description():
         executable="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+        condition=IfCondition(LaunchConfiguration("start_robot_state_publisher")),
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -173,6 +174,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        DeclareLaunchArgument("start_robot_state_publisher", default_value="true"),
         DeclareLaunchArgument("hoverboard_power_on", default_value="true"),
         DeclareLaunchArgument(
             "hoverboard_power_off_on_shutdown",

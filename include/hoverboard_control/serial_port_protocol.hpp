@@ -39,6 +39,13 @@ typedef struct {
     uint16_t checksum;
 } MotorWheelFeedback;
 
+inline uint16_t feedbackChecksum(const MotorWheelFeedback &feedback) {
+    return static_cast<uint16_t>(feedback.head ^ feedback.command1 ^ feedback.command2 ^
+        feedback.rightMotorSpeed ^ feedback.leftMotorSpeed ^
+        feedback.rightMotorEncoderCumulativeCount ^ feedback.leftMotorEncoderCumulativeCount ^
+        feedback.batteryVoltage ^ feedback.boardTemperature ^ feedback.commandLed);
+}
+
 typedef struct {
     uint16_t head = HEAD_FRAME;
     int16_t  steer;
